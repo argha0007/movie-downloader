@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparing Download...</title>
+    <style>
+        body { background-color: #000; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .box { background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; text-align: center; max-width: 400px; width: 90%; }
+        .loader { border: 4px solid #333; border-top: 4px solid #c0392b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn { display: none; background: #c0392b; color: white; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px; font-size: 18px; margin-top: 20px; }
+        .btn:hover { background: #e74c3c; }
+        .error { color: #ff4444; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2 id="status">Connecting to Server...</h2>
+        <div id="loader" class="loader"></div>
+        <a id="dlButton" class="btn" href="#" target="_blank">DOWNLOAD NOW</a>
+        <div id="errorMsg" class="error"></div>
+    </div>
+
+    <script>
+        // ====================================================
+        // PASTE YOUR GOOGLE APPS SCRIPT URL BELOW
+        // ====================================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbwg-QCZN4c3W0ZserRn2-hiCx5VKDkhNySjAQcnu2-gue1rI7JuX76jVSuz7qU1ustqGQ/exec"; 
+        // ====================================================
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const target = urlParams.get('url');
+
+            if (!target) {
+                document.getElementById('status').innerText = "Error: No Link Found";
+                document.getElementById('loader').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('status').innerText = "Generating Direct Link...";
+
+            fetch(API_URL + "?url=" + encodeURIComponent(target))
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loader').style.display = 'none';
+                if (data.status === 'success') {
+                    document.getElementById('status').innerText = "Ready!";
+                    const btn = document.getElementById('dlButton');
+                    btn.href = data.downloadLink;
+                    btn.innerText = "DOWNLOAD " + data.type;
+                    btn.style.display = 'inline-block';
+                    // Optional: Auto-click
+                    // window.location.href = data.downloadLink;
+                } else {
+                    document.getElementById('status').innerText = "Failed";
+                    document.getElementById('errorMsg').innerText = data.message;
+                }
+            })
+            .catch(err => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('status').innerText = "Network Error";
+            });
+        };
+    </script>
+</body>
+</html>
